@@ -20,7 +20,6 @@ model IdeaSprintRegistration {
   leaderPhone    String
   leaderCollege  String
   leaderDegree   String
-  leaderYear     String
 
   // Member 2
   member2Name     String?
@@ -70,7 +69,6 @@ model BuildStormRegistration {
   leaderPhone    String
   leaderCollege  String
   leaderDegree   String
-  leaderYear     String
 
   // Member 2
   member2Name     String?

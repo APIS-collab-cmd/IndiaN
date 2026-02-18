@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     // Mapping frontend fields to Prisma schema fields
-    // Frontend uses: track, teamName, teamSize, leaderName, leaderEmail, leaderMobile, leaderCollege, leaderDegree, leaderYear
+    // Mapping frontend fields to Prisma schema fields
     const { 
       track, 
       teamName,
@@ -17,7 +17,6 @@ export async function POST(req: Request) {
       leaderMobile,
       leaderCollege,
       leaderDegree,
-      leaderYear,
       
       // Members
       member2Name, member2Email, member2College, member2Degree,
@@ -32,17 +31,17 @@ export async function POST(req: Request) {
       expectedImpact,
       techStack,
       docLink,
-      ideaRules, // Checkbox array (not stored directly or needs formatting)
       
       // Track 2: BuildStorm
       problemDesc,
       githubLink,
-      buildRules, // Checkbox array
 
       // Meta
       hearAbout,
       additionalNotes
     } = body;
+
+    // ... (keeping validation logic) ...
 
     if (!track || !leaderEmail) {
       return NextResponse.json({ error: 'Track and Email are required' }, { status: 400 });
@@ -58,7 +57,7 @@ export async function POST(req: Request) {
     }
 
     // Check if ALREADY registered FOR THIS TRACK
-    if (track === 'Track 1: IdeaSprint') {
+    if (track === "IdeaSprint: Build MVP in 24 Hours") {
       const existing = await prisma.ideaSprintRegistration.findUnique({
         where: { leaderEmail },
       });
@@ -69,31 +68,29 @@ export async function POST(req: Request) {
       await prisma.ideaSprintRegistration.create({
         data: {
           teamName,
-          teamSize, // Store as string directly
+          teamSize,
           leaderName,
           leaderEmail,
           leaderPhone: leaderMobile,
           leaderCollege,
           leaderDegree,
-          leaderYear,
+          // Removed leaderYear
           member2Name, member2Email, member2College, member2Degree,
           member3Name, member3Email, member3College, member3Degree,
           member4Name, member4Email, member4College, member4Degree,
-          
           ideaTitle,
           problemStatement,
           proposedSolution,
           targetUsers,
           expectedImpact,
-          techStack,
+          techStack: techStack || "",
           psDocLink: docLink,
-          
           hearAbout,
           additionalNotes
         },
       });
-    } else if (track === 'Track 2: BuildStorm') {
-      const existing = await prisma.buildStormRegistration.findUnique({
+    } else if (track === "BuildStorm: Solve Problem Statement in 24 Hours") {
+       const existing = await prisma.buildStormRegistration.findUnique({
         where: { leaderEmail },
       });
       if (existing) {
@@ -109,20 +106,18 @@ export async function POST(req: Request) {
           leaderPhone: leaderMobile,
           leaderCollege,
           leaderDegree,
-          leaderYear,
+          // Removed leaderYear
           member2Name, member2Email, member2College, member2Degree,
           member3Name, member3Email, member3College, member3Degree,
           member4Name, member4Email, member4College, member4Degree,
-          
           problemDesc,
           githubLink,
-          
           hearAbout,
           additionalNotes
         },
       });
     } else {
-      return NextResponse.json({ error: 'Invalid Track Selection' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid Track Selection: ' + track }, { status: 400 });
     }
 
     // Optional: Send confirmation email

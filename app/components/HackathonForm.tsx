@@ -94,13 +94,6 @@ const QUESTIONS = [
     placeholder: "e.g. B.Tech CSE",
     required: true,
   },
-  {
-    id: 'leaderYear',
-    type: 'choice',
-    question: "Year of Study",
-    options: ["1st Year", "2nd Year", "3rd Year", "Final Year", "Postgraduate"],
-    required: true,
-  },
   
   // --- SECTION 5: TEAM MEMBER DETAILS ---
   // Member 2
