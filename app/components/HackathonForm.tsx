@@ -238,6 +238,15 @@ export default function HackathonForm() {
   const submitForm = async () => {
       setLoading(true);
       
+      // DEMO MODE BYPASS
+      if (answers.leaderEmail === "demo@indianext.in") {
+          setTimeout(() => {
+              setIsCompleted(true);
+              setLoading(false);
+          }, 1500); // Fake delay
+          return;
+      }
+
       // Map Friendly Track Name to API value
       const trackCode = answers.track.startsWith("A") ? "A" : "B";
       
@@ -266,6 +275,17 @@ export default function HackathonForm() {
   const sendOtp = async () => {
       setLoading(true);
       setErrorMsg("");
+
+      // DEMO MODE BYPASS
+      if (answers.leaderEmail === "demo@indianext.in") {
+          setTimeout(() => {
+              setShowOtpInput(true);
+              setLoading(false);
+              alert("DEMO OTP: 123456"); // Alert for user convenience
+          }, 1000);
+          return;
+      }
+
       try {
           const res = await fetch('/api/send-otp', {
               method: 'POST',
@@ -286,6 +306,26 @@ export default function HackathonForm() {
   const verifyOtp = async () => {
       setLoading(true);
       setErrorMsg("");
+
+      // DEMO MODE BYPASS
+      if (answers.leaderEmail === "demo@indianext.in") {
+          if (otpValue === "123456") {
+              setTimeout(() => {
+                  setEmailVerified(true);
+                  setShowOtpInput(false);
+                  const nextStep = getNextValidStep(currentStep, 1, answers);
+                  setDirection(1);
+                  setCurrentStep(nextStep);
+                  setLoading(false);
+              }, 1000);
+              return;
+          } else {
+              setErrorMsg("Invalid Demo OTP (Try 123456)");
+              setLoading(false);
+              return;
+          }
+      }
+
       try {
           const res = await fetch('/api/verify-otp', {
               method: 'POST',
