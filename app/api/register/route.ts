@@ -5,31 +5,43 @@ import { prisma } from '@/lib/prisma';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+
+    // Mapping frontend fields to Prisma schema fields
+    // Frontend uses: track, teamName, teamSize, leaderName, leaderEmail, leaderMobile, leaderCollege, leaderDegree, leaderYear
     const { 
       track, 
-      leaderEmail,
       teamName,
+      teamSize,
       leaderName,
-      leaderPhone,
+      leaderEmail,
+      leaderMobile,
       leaderCollege,
+      leaderDegree,
+      leaderYear,
       
-      // Track A fields
-      pastHackathonExperience,
-      
-      // Track B fields
-      projectTitle,
-      projectAbstract,
+      // Members
+      member2Name, member2Email, member2College, member2Degree,
+      member3Name, member3Email, member3College, member3Degree,
+      member4Name, member4Email, member4College, member4Degree,
+
+      // Track 1: IdeaSprint
+      ideaTitle,
+      problemStatement,
+      proposedSolution,
+      targetUsers,
+      expectedImpact,
       techStack,
-      focusArea,
+      docLink,
+      ideaRules, // Checkbox array (not stored directly or needs formatting)
       
-      // Members (flat)
-      member2Name, member2Email, member2Github, member2Linkedin,
-      member3Name, member3Email, member3Github, member3Linkedin,
-      member4Name, member4Email, member4Github, member4Linkedin,
-      
-      // Leader Extras
-      leaderGithub,
-      leaderLinkedin
+      // Track 2: BuildStorm
+      problemDesc,
+      githubLink,
+      buildRules, // Checkbox array
+
+      // Meta
+      hearAbout,
+      additionalNotes
     } = body;
 
     if (!track || !leaderEmail) {
@@ -46,69 +58,71 @@ export async function POST(req: Request) {
     }
 
     // Check if ALREADY registered FOR THIS TRACK
-    if (track === 'A') {
-      const existing = await prisma.solverRegistration.findUnique({
+    if (track === 'Track 1: IdeaSprint') {
+      const existing = await prisma.ideaSprintRegistration.findUnique({
         where: { leaderEmail },
       });
       if (existing) {
-        return NextResponse.json({ error: 'You have already registered for Track A (The Solvers).' }, { status: 409 });
+        return NextResponse.json({ error: 'You have already registered for IdeaSprint.' }, { status: 409 });
       }
 
-      await prisma.solverRegistration.create({
+      await prisma.ideaSprintRegistration.create({
         data: {
           teamName,
+          teamSize, // Store as string directly
           leaderName,
           leaderEmail,
-          leaderPhone,
+          leaderPhone: leaderMobile,
           leaderCollege,
-          leaderGithub,
-          leaderLinkedin,
-          member2Name,
-          member2Github,
-          member2Linkedin,
-          member3Name,
-          member3Github,
-          member3Linkedin,
-          member4Name,
-          member4Github,
-          member4Linkedin,
-          pastHackathonExperience,
+          leaderDegree,
+          leaderYear,
+          member2Name, member2Email, member2College, member2Degree,
+          member3Name, member3Email, member3College, member3Degree,
+          member4Name, member4Email, member4College, member4Degree,
+          
+          ideaTitle,
+          problemStatement,
+          proposedSolution,
+          targetUsers,
+          expectedImpact,
+          techStack,
+          psDocLink: docLink,
+          
+          hearAbout,
+          additionalNotes
         },
       });
-    } else if (track === 'B') {
-      const existing = await prisma.visionaryRegistration.findUnique({
+    } else if (track === 'Track 2: BuildStorm') {
+      const existing = await prisma.buildStormRegistration.findUnique({
         where: { leaderEmail },
       });
       if (existing) {
-        return NextResponse.json({ error: 'You have already registered for Track B (The Visionaries).' }, { status: 409 });
+        return NextResponse.json({ error: 'You have already registered for BuildStorm.' }, { status: 409 });
       }
 
-      await prisma.visionaryRegistration.create({
+      await prisma.buildStormRegistration.create({
         data: {
           teamName,
+          teamSize,
           leaderName,
           leaderEmail,
-          leaderPhone,
+          leaderPhone: leaderMobile,
           leaderCollege,
-          leaderGithub,
-          leaderLinkedin,
-          member2Name,
-          member2Github,
-          member2Linkedin,
-          member3Name,
-          member3Github,
-          member3Linkedin,
-          member4Name,
-          member4Github,
-          member4Linkedin,
-          projectTitle,
-          projectAbstract,
-          techStack,
-          focusArea,
+          leaderDegree,
+          leaderYear,
+          member2Name, member2Email, member2College, member2Degree,
+          member3Name, member3Email, member3College, member3Degree,
+          member4Name, member4Email, member4College, member4Degree,
+          
+          problemDesc,
+          githubLink,
+          
+          hearAbout,
+          additionalNotes
         },
       });
     } else {
-      return NextResponse.json({ error: 'Invalid Track' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid Track Selection' }, { status: 400 });
     }
 
     // Optional: Send confirmation email

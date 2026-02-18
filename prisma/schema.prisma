@@ -6,73 +6,97 @@ datasource db {
   provider = "postgresql"
 }
 
-// TRACK A: THE SOLVERS
-model SolverRegistration {
+// TRACK 1: IdeaSprint (Idea-Based)
+model IdeaSprintRegistration {
   id        String   @id @default(cuid())
-  teamName  String
   
+  // Team Details
+  teamName  String
+  teamSize  String // Solo, 2 Members, etc.
+
   // Leader Details
   leaderName     String
-  leaderEmail    String   @unique // One registration per email for Track A
+  leaderEmail    String   @unique
   leaderPhone    String
   leaderCollege  String
-  leaderGithub   String
-  leaderLinkedin String?
+  leaderDegree   String
+  leaderYear     String
 
   // Member 2
-  member2Name     String
-  member2Github   String
-  member2Linkedin String?
-  
+  member2Name     String?
+  member2Email    String?
+  member2College  String?
+  member2Degree   String?
+
   // Member 3
-  member3Name     String
-  member3Github   String
-  member3Linkedin String?
+  member3Name     String?
+  member3Email    String?
+  member3College  String?
+  member3Degree   String?
 
   // Member 4
-  member4Name     String
-  member4Github   String
-  member4Linkedin String?
+  member4Name     String?
+  member4Email    String?
+  member4College  String?
+  member4Degree   String?
 
-  // Track A Specifics
-  pastHackathonExperience String? // Text describing past experience
+  // Idea Details
+  ideaTitle        String
+  problemStatement String
+  proposedSolution String
+  targetUsers      String
+  expectedImpact   String
+  techStack        String?
+  psDocLink        String? // Link to deck/doc
 
+  // Meta
+  hearAbout        String
+  additionalNotes  String?
+  
   createdAt DateTime @default(now())
 }
 
-// TRACK B: THE VISIONARIES
-model VisionaryRegistration {
+// TRACK 2: BuildStorm (24-Hour Hackathon)
+model BuildStormRegistration {
   id        String   @id @default(cuid())
+
+  // Team Details
   teamName  String
+  teamSize  String
 
   // Leader Details
   leaderName     String
-  leaderEmail    String   @unique // One registration per email for Track B
+  leaderEmail    String   @unique
   leaderPhone    String
   leaderCollege  String
-  leaderGithub   String
-  leaderLinkedin String?
+  leaderDegree   String
+  leaderYear     String
 
   // Member 2
-  member2Name     String
-  member2Github   String
-  member2Linkedin String?
-  
+  member2Name     String?
+  member2Email    String?
+  member2College  String?
+  member2Degree   String?
+
   // Member 3
-  member3Name     String
-  member3Github   String
-  member3Linkedin String?
+  member3Name     String?
+  member3Email    String?
+  member3College  String?
+  member3Degree   String?
 
   // Member 4
-  member4Name     String
-  member4Github   String
-  member4Linkedin String?
+  member4Name     String?
+  member4Email    String?
+  member4College  String?
+  member4Degree   String?
 
-  // Track B Specifics
-  projectTitle    String
-  projectAbstract String
-  techStack       String
-  focusArea       String // TrustTech, Sustainable Intelligence, etc.
+  // Project Details
+  problemDesc      String
+  githubLink       String?
+
+  // Meta
+  hearAbout        String
+  additionalNotes  String?
 
   createdAt DateTime @default(now())
 }
