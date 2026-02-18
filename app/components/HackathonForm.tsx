@@ -507,7 +507,7 @@ const InputRenderer = ({ question, value, onChange, onCheckbox }: any) => {
                 }
             }}
             placeholder={question.placeholder ? question.placeholder.toUpperCase() : ''}
-            className="flex-1 bg-slate-900/50 border border-slate-700 p-4 text-xl font-mono text-white placeholder-slate-700 focus:outline-none focus:border-orange-500 transition-all resize-none h-64 tracking-tight leading-relaxed"
+            className="flex-1 bg-slate-900/50 border border-slate-700 p-4 text-xl font-mono text-white placeholder-slate-700 focus:outline-none focus:border-orange-500 transition-all resize-none h-48 md:h-64 tracking-tight leading-relaxed"
          />
          
          {/* Guidance Panel */}
@@ -844,7 +844,7 @@ export default function HackathonForm() {
           </div>
 
           {/* Folder Body */}
-          <div className="bg-slate-800 border-2 border-slate-700 rounded-b-lg rounded-tr-lg p-1 shadow-2xl relative min-h-[600px] flex flex-col">
+          <div className="bg-slate-800 border-2 border-slate-700 rounded-b-lg rounded-tr-lg p-1 shadow-2xl relative min-h-[500px] md:min-h-[600px] flex flex-col">
               {/* Inner 'Paper' or Interface */}
               <div className="bg-slate-900 flex-1 rounded border border-slate-700/50 p-6 md:p-12 relative overflow-hidden flex flex-col">
                  
