@@ -3,19 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronUp, ChevronDown, Check, Loader2, Upload } from 'lucide-react';
-
-// Design Constants
-const THEME = {
-  bg: 'bg-slate-950',
-  text: 'text-slate-100',
-  primary: 'bg-orange-600 hover:bg-orange-700',
-  secondary: 'bg-emerald-600',
-  accent: 'text-orange-500', 
-  border: 'border-slate-800',
-  inputBg: 'bg-slate-900',
-  glow: 'shadow-[0_0_50px_rgba(234,88,12,0.15)]',
-};
+import { Check } from 'lucide-react';
 
 const QUESTIONS = [
   // --- SECTION 1: TRACK SELECTION ---
@@ -615,6 +603,16 @@ export default function HackathonForm() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
+  // ✅ NEW: Generate idempotency key once per form session
+  const [idempotencyKey] = useState(() => {
+    // Use crypto.randomUUID() if available
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    // Fallback for older browsers
+    return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+  });
+
   const totalSteps = QUESTIONS.length;
   // Progress is separate from "Folder" but we can integrate it.
 
@@ -647,13 +645,29 @@ export default function HackathonForm() {
           const res = await fetch('/api/send-otp', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: answers.leaderEmail }),
+              body: JSON.stringify({ 
+                email: answers.leaderEmail,
+                purpose: 'REGISTRATION' // ✅ NEW: Include purpose
+              }),
           });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error);
+          const response = await res.json();
+          
+          // ✅ NEW: Handle structured response
+          if (!response.success) {
+            setErrorMsg(response.message);
+            setLoading(false);
+            return;
+          }
+          
+          // ✅ NEW: Show debug OTP in development
+          if (response.debugOtp) {
+            console.log('Debug OTP:', response.debugOtp);
+            alert(`Development Mode - OTP: ${response.debugOtp}`);
+          }
+          
           setShowOtpInput(true);
       } catch (err: any) {
-          setErrorMsg(err.message);
+          setErrorMsg(err.message || 'Network error. Please try again.');
       } finally {
           setLoading(false);
       }
@@ -678,21 +692,41 @@ export default function HackathonForm() {
           if (finalAnswers.track === "IdeaSprint: Build MVP in 24 Hours") finalAnswers.additionalNotes = finalAnswers.ideaAdditionalNotes;
           if (finalAnswers.track === "BuildStorm: Solve Problem Statement in 24 Hours") finalAnswers.additionalNotes = finalAnswers.buildAdditionalNotes;
 
+          // ✅ NEW: Get session token
+          const sessionToken = localStorage.getItem('session_token');
+
           const res = await fetch('/api/register', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(finalAnswers),
+              headers: {
+                'Content-Type': 'application/json',
+                // ✅ NEW: Include authorization header
+                ...(sessionToken && { 'Authorization': `Bearer ${sessionToken}` }),
+              },
+              body: JSON.stringify({
+                // ✅ NEW: Include idempotency key
+                idempotencyKey,
+                ...finalAnswers,
+              }),
           });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || 'Submission failed');
           
+          const response = await res.json();
+          
+          // ✅ NEW: Handle structured response
+          if (!response.success) {
+            setErrorMsg(response.message);
+            setLoading(false);
+            return;
+          }
+          
+          // ✅ NEW: Log success data
+          console.log('Registration successful:', response.data);
           setIsCompleted(true);
       } catch (err: any) {
-          setErrorMsg(err.message);
+          setErrorMsg(err.message || 'Network error. Please try again.');
       } finally {
           setLoading(false);
       }
-  }, [answers, setIsCompleted]);
+  }, [answers, idempotencyKey, setIsCompleted]);
 
   const handleNext = React.useCallback(async () => {
     // --- VALIDATIONS ---
@@ -772,9 +806,30 @@ export default function HackathonForm() {
           const res = await fetch('/api/verify-otp', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: answers.leaderEmail, otp: otpValue }),
+              body: JSON.stringify({ 
+                email: answers.leaderEmail, 
+                otp: otpValue,
+                purpose: 'REGISTRATION' // ✅ NEW: Include purpose
+              }),
           });
-          if (!res.ok) throw new Error((await res.json()).error);
+          
+          const response = await res.json();
+          
+          // ✅ NEW: Handle structured response
+          if (!response.success) {
+            setErrorMsg(response.message);
+            setLoading(false);
+            return;
+          }
+          
+          // ✅ NEW: Store session token
+          if (response.data?.session) {
+            localStorage.setItem('session_token', response.data.session.token);
+            localStorage.setItem('session_expires', response.data.session.expiresAt);
+            localStorage.setItem('user_email', response.data.user.email);
+            console.log('Session token stored:', response.data.session.token.substring(0, 10) + '...');
+          }
+          
           setEmailVerified(true);
           setShowOtpInput(false);
           setTimeout(() => {
@@ -783,7 +838,7 @@ export default function HackathonForm() {
              setCurrentStep(nextStep);
           }, 500);
       } catch (err: any) {
-          setErrorMsg(err.message);
+          setErrorMsg(err.message || 'Network error. Please try again.');
       } finally {
           setLoading(false);
       }

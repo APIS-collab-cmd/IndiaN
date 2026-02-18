@@ -1,23 +1,15 @@
-// ═══════════════════════════════════════════════════════════
-// IndiaNext - Production-Ready Normalized Schema
-// ═══════════════════════════════════════════════════════════
-// ✅ Fixes ALL 8 critical issues from the old schema:
-// 1. ✅ No data duplication (single Team model for both tracks)
-// 2. ✅ Normalized members (proper many-to-many relationship)
-// 3. ✅ Proper indexes on all query columns
-// 4. ✅ updatedAt fields everywhere
-// 5. ✅ teamSize is Int (not string)
-// 6. ✅ Enums for all categorical data
-// 7. ✅ OTP linked to User via foreign key
-// 8. ✅ Status field with proper enum
-// ═══════════════════════════════════════════════════════════
+// Complete Prisma Schema for IndiaNext
+// This is the production-ready normalized schema
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -151,6 +143,7 @@ model Team {
   @@index([status, createdAt])
   @@index([rank])
   @@index([createdBy])
+  @@fulltext([name])
   @@map("teams")
 }
 
@@ -214,6 +207,7 @@ model Submission {
   files File[]
 
   @@index([teamId])
+  @@fulltext([ideaTitle, problemStatement])
   @@map("submissions")
 }
 
