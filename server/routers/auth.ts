@@ -3,7 +3,7 @@
 // This router is for session management and profile updates
 
 import { z } from "zod";
-import { router, publicProcedure, protectedProcedure } from "../trpc";
+import { router, protectedProcedure } from "../trpc";
 
 export const authRouter = router({
   // Get current user

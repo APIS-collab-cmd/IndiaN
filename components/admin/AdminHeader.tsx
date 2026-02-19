@@ -1,5 +1,5 @@
 // Admin Header - Stub Component
-export function AdminHeader({ user }: { user: any }) {
+export function AdminHeader({ user }: { user: { email: string; name?: string; role?: string } }) {
   return (
     <header className="bg-white border-b border-gray-200 p-4">
       <div className="flex justify-between items-center">

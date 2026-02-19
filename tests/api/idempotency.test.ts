@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 describe('Idempotency Logic', () => {
   // Replicate the idempotency logic for isolated testing

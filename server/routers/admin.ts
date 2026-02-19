@@ -1,6 +1,6 @@
 // Admin tRPC Router - Complete Implementation
 import { z } from "zod";
-import { router, adminProcedure, protectedProcedure } from "../trpc";
+import { router, adminProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 
 export const adminRouter = router({
@@ -104,7 +104,7 @@ export const adminRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const where: any = {
+      const where: Record<string, unknown> = {
         deletedAt: null,
       };
 
@@ -145,9 +145,10 @@ export const adminRouter = router({
 
       // Date range filter
       if (input.dateRange?.from || input.dateRange?.to) {
-        where.createdAt = {};
-        if (input.dateRange.from) where.createdAt.gte = input.dateRange.from;
-        if (input.dateRange.to) where.createdAt.lte = input.dateRange.to;
+        const createdAt: { gte?: Date; lte?: Date } = {};
+        if (input.dateRange.from) createdAt.gte = input.dateRange.from;
+        if (input.dateRange.to) createdAt.lte = input.dateRange.to;
+        where.createdAt = createdAt;
       }
 
       const [teams, totalCount] = await Promise.all([
@@ -274,7 +275,7 @@ export const adminRouter = router({
       });
 
       // Send notification to team members
-      const notifications = team.members.map((member: any) => ({
+      const notifications = team.members.map((member: { userId: string }) => ({
         userId: member.userId,
         type: "STATUS_UPDATE" as const,
         title: `Team Status Updated`,
@@ -500,7 +501,7 @@ export const adminRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const where: any = {
+      const where: Record<string, unknown> = {
         deletedAt: null,
       };
 
@@ -513,7 +514,7 @@ export const adminRouter = router({
       }
 
       if (input.role && input.role !== "all") {
-        where.role = input.role as any;
+        where.role = input.role;
       }
 
       const [users, totalCount] = await Promise.all([
@@ -586,7 +587,7 @@ export const adminRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const where: any = {};
+      const where: Record<string, unknown> = {};
 
       if (input.action) {
         where.action = { contains: input.action };
@@ -642,16 +643,16 @@ export const adminRouter = router({
       
       const userId = ctx.session.user.id;
       
-      const where: any = {
+      const where: Record<string, unknown> = {
         deletedAt: null,
       };
 
       if (input.status && input.status !== "all") {
-        where.status = input.status as any;
+        where.status = input.status;
       }
 
       if (input.track && input.track !== "all") {
-        where.track = input.track as any;
+        where.track = input.track;
       }
 
       const teams = await ctx.prisma.team.findMany({

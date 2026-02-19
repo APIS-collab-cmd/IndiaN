@@ -4,6 +4,7 @@ import { sendOtpEmail } from '@/lib/email';
 import { rateLimitCombined, createRateLimitHeaders } from '@/lib/rate-limit';
 import crypto from 'crypto';
 import { z } from 'zod';
+import type { OtpPurpose } from '@prisma/client';
 
 // Input validation schema
 const SendOtpSchema = z.object({
@@ -64,7 +65,7 @@ export async function POST(req: Request) {
       where: {
         email_purpose: {
           email,
-          purpose: purpose as any,
+          purpose: purpose as OtpPurpose,
         },
       },
       update: {
@@ -76,7 +77,7 @@ export async function POST(req: Request) {
       create: {
         email,
         otp: otpHash, // Store hash, not plain text
-        purpose: purpose as any,
+        purpose: purpose as OtpPurpose,
         expiresAt,
         verified: false,
         attempts: 0,

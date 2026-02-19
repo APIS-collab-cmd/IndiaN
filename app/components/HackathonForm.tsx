@@ -4,8 +4,27 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check } from 'lucide-react';
+import Link from 'next/link';
 
-const QUESTIONS = [
+// ── Types ───────────────────────────────────────
+type Answers = Record<string, string | string[] | undefined>;
+
+interface Question {
+  id: string;
+  type: string;
+  question: string;
+  subtext?: string;
+  text?: string;
+  placeholder?: string;
+  options?: string[];
+  required?: boolean;
+  isEmail?: boolean;
+  noPaste?: boolean;
+  guidance?: string;
+  condition?: (answers: Answers) => boolean;
+}
+
+const QUESTIONS: Question[] = [
   // --- SECTION 1: TRACK SELECTION ---
   {
     id: 'track',
@@ -26,7 +45,7 @@ const QUESTIONS = [
       question: "MISSION BRIEFING",
       subtext: "Review your objective before proceeding.",
       text: "PROBLEM STATEMENT:\n\nDisaster Response Coordination\n\nObjective: Build a real-time, offline-first system to connect flood victims with local rescue teams.",
-      condition: (answers: any) => answers.track === "BuildStorm: Solve Problem Statement in 24 Hours",
+      condition: (answers: Answers) => answers.track === "BuildStorm: Solve Problem Statement in 24 Hours",
   },
 
   // --- SECTION 3: TEAM DETAILS ---
@@ -91,7 +110,7 @@ const QUESTIONS = [
     question: "Member 2 Full Name",
     placeholder: "Full Name",
     required: true,
-    condition: (answers: any) => ["2 Members", "3 Members", "4 Members"].includes(answers.teamSize),
+    condition: (answers: Answers) => typeof answers.teamSize === 'string' && ["2 Members", "3 Members", "4 Members"].includes(answers.teamSize),
   },
   {
     id: 'member2Email',
@@ -99,7 +118,7 @@ const QUESTIONS = [
     question: "Member 2 Email",
     placeholder: "Email Address",
     required: true,
-    condition: (answers: any) => ["2 Members", "3 Members", "4 Members"].includes(answers.teamSize),
+    condition: (answers: Answers) => typeof answers.teamSize === 'string' && ["2 Members", "3 Members", "4 Members"].includes(answers.teamSize),
   },
   {
     id: 'member2CollegeSame',
@@ -107,7 +126,7 @@ const QUESTIONS = [
     question: "Member 2 College",
     options: ["Same as Leader"],
     required: false,
-    condition: (answers: any) => ["2 Members", "3 Members", "4 Members"].includes(answers.teamSize),
+    condition: (answers: Answers) => typeof answers.teamSize === 'string' && ["2 Members", "3 Members", "4 Members"].includes(answers.teamSize),
   },
   {
     id: 'member2College',
@@ -115,9 +134,9 @@ const QUESTIONS = [
     question: "Member 2 College Name",
     placeholder: "College Name",
     required: true,
-    condition: (answers: any) => {
-        const isMember = ["2 Members", "3 Members", "4 Members"].includes(answers.teamSize);
-        const isSame = answers.member2CollegeSame && answers.member2CollegeSame.includes("Same as Leader");
+    condition: (answers: Answers) => {
+        const isMember = typeof answers.teamSize === 'string' && ["2 Members", "3 Members", "4 Members"].includes(answers.teamSize);
+        const isSame = Array.isArray(answers.member2CollegeSame) && answers.member2CollegeSame.includes("Same as Leader");
         return isMember && !isSame;
     },
   },
@@ -127,7 +146,7 @@ const QUESTIONS = [
     question: "Member 2 Degree/Course",
     placeholder: "e.g. BTech CSE",
     required: true,
-    condition: (answers: any) => ["2 Members", "3 Members", "4 Members"].includes(answers.teamSize),
+    condition: (answers: Answers) => typeof answers.teamSize === 'string' && ["2 Members", "3 Members", "4 Members"].includes(answers.teamSize),
   },
 
   // Member 3
@@ -137,7 +156,7 @@ const QUESTIONS = [
     question: "Member 3 Full Name",
     placeholder: "Full Name",
     required: true,
-    condition: (answers: any) => ["3 Members", "4 Members"].includes(answers.teamSize),
+    condition: (answers: Answers) => typeof answers.teamSize === 'string' && ["3 Members", "4 Members"].includes(answers.teamSize),
   },
   {
     id: 'member3Email',
@@ -145,7 +164,7 @@ const QUESTIONS = [
     question: "Member 3 Email",
     placeholder: "Email Address",
     required: true,
-    condition: (answers: any) => ["3 Members", "4 Members"].includes(answers.teamSize),
+    condition: (answers: Answers) => typeof answers.teamSize === 'string' && ["3 Members", "4 Members"].includes(answers.teamSize),
   },
   {
     id: 'member3CollegeSame',
@@ -153,7 +172,7 @@ const QUESTIONS = [
     question: "Member 3 College",
     options: ["Same as Leader"],
     required: false,
-    condition: (answers: any) => ["3 Members", "4 Members"].includes(answers.teamSize),
+    condition: (answers: Answers) => typeof answers.teamSize === 'string' && ["3 Members", "4 Members"].includes(answers.teamSize),
   },
   {
     id: 'member3College',
@@ -161,9 +180,9 @@ const QUESTIONS = [
     question: "Member 3 College Name",
     placeholder: "College Name",
     required: true,
-    condition: (answers: any) => {
-        const isMember = ["3 Members", "4 Members"].includes(answers.teamSize);
-        const isSame = answers.member3CollegeSame && answers.member3CollegeSame.includes("Same as Leader");
+    condition: (answers: Answers) => {
+        const isMember = typeof answers.teamSize === 'string' && ["3 Members", "4 Members"].includes(answers.teamSize);
+        const isSame = Array.isArray(answers.member3CollegeSame) && answers.member3CollegeSame.includes("Same as Leader");
         return isMember && !isSame;
     },
   },
@@ -173,7 +192,7 @@ const QUESTIONS = [
     question: "Member 3 Degree/Course",
     placeholder: "e.g. BTech CSE",
     required: true,
-    condition: (answers: any) => ["3 Members", "4 Members"].includes(answers.teamSize),
+    condition: (answers: Answers) => typeof answers.teamSize === 'string' && ["3 Members", "4 Members"].includes(answers.teamSize),
   },
 
   // Member 4
@@ -183,7 +202,7 @@ const QUESTIONS = [
     question: "Member 4 Full Name",
     placeholder: "Full Name",
     required: true,
-    condition: (answers: any) => ["4 Members"].includes(answers.teamSize),
+    condition: (answers: Answers) => typeof answers.teamSize === 'string' && ["4 Members"].includes(answers.teamSize),
   },
   {
     id: 'member4Email',
@@ -191,7 +210,7 @@ const QUESTIONS = [
     question: "Member 4 Email",
     placeholder: "Email Address",
     required: true,
-    condition: (answers: any) => ["4 Members"].includes(answers.teamSize),
+    condition: (answers: Answers) => typeof answers.teamSize === 'string' && ["4 Members"].includes(answers.teamSize),
   },
   {
     id: 'member4CollegeSame',
@@ -199,7 +218,7 @@ const QUESTIONS = [
     question: "Member 4 College",
     options: ["Same as Leader"],
     required: false,
-    condition: (answers: any) => ["4 Members"].includes(answers.teamSize),
+    condition: (answers: Answers) => typeof answers.teamSize === 'string' && ["4 Members"].includes(answers.teamSize),
   },
   {
     id: 'member4College',
@@ -207,9 +226,9 @@ const QUESTIONS = [
     question: "Member 4 College Name",
     placeholder: "College Name",
     required: true,
-    condition: (answers: any) => {
-        const isMember = ["4 Members"].includes(answers.teamSize);
-        const isSame = answers.member4CollegeSame && answers.member4CollegeSame.includes("Same as Leader");
+    condition: (answers: Answers) => {
+        const isMember = typeof answers.teamSize === 'string' && ["4 Members"].includes(answers.teamSize);
+        const isSame = Array.isArray(answers.member4CollegeSame) && answers.member4CollegeSame.includes("Same as Leader");
         return isMember && !isSame;
     },
   },
@@ -219,7 +238,7 @@ const QUESTIONS = [
     question: "Member 4 Degree/Course",
     placeholder: "e.g. BTech CSE",
     required: true,
-    condition: (answers: any) => ["4 Members"].includes(answers.teamSize),
+    condition: (answers: Answers) => typeof answers.teamSize === 'string' && ["4 Members"].includes(answers.teamSize),
   },
 
   // --- SECTION 6: SUBMISSION DETAILS (TRACK 1) ---
@@ -229,7 +248,7 @@ const QUESTIONS = [
     question: "Idea Title",
     placeholder: "Title of your idea",
     required: true,
-    condition: (answers: any) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
+    condition: (answers: Answers) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
   },
   {
     id: 'problemStatement',
@@ -238,7 +257,7 @@ const QUESTIONS = [
     subtext: "Describe the problem clearly in 4–6 lines.",
     placeholder: "The problem we are solving is...",
     required: true,
-    condition: (answers: any) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
+    condition: (answers: Answers) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
   },
   {
     id: 'proposedSolution',
@@ -247,7 +266,7 @@ const QUESTIONS = [
     subtext: "Explain your idea and approach.",
     placeholder: "Our solution is...",
     required: true,
-    condition: (answers: any) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
+    condition: (answers: Answers) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
     noPaste: true,
     guidance: "Suggested Format:\n\n1. The Gap: What is missing today?\n2. The Solution: Your core value proposition.\n3. Implementation: How will you build it?\n4. Feasibility: Why is this possible now?",
   },
@@ -257,7 +276,7 @@ const QUESTIONS = [
     question: "Target Users / Beneficiaries",
     placeholder: "e.g. Students, Hospitals, Small Businesses",
     required: true,
-    condition: (answers: any) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
+    condition: (answers: Answers) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
   },
   {
     id: 'expectedImpact',
@@ -265,7 +284,7 @@ const QUESTIONS = [
     question: "Expected Impact",
     placeholder: "Social or economic impact...",
     required: true,
-    condition: (answers: any) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
+    condition: (answers: Answers) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
   },
   {
     id: 'techStack',
@@ -273,7 +292,7 @@ const QUESTIONS = [
     question: "Technology Stack (Recommended)",
     placeholder: "e.g. React, Python, AI/ML, Blockchain",
     required: false,
-    condition: (answers: any) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
+    condition: (answers: Answers) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
   },
   {
     id: 'docLink',
@@ -282,7 +301,7 @@ const QUESTIONS = [
     subtext: "Upload Idea Deck (PDF), Prototype, or Research to Drive/Dropbox and paste public link here. (Max 10 slides)",
     placeholder: "https://drive.google.com/...",
     required: true,
-    condition: (answers: any) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
+    condition: (answers: Answers) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
   },
   {
     id: 'ideaRules',
@@ -299,7 +318,7 @@ const QUESTIONS = [
       "I agree to maintain respectful communication."
     ],
     required: true,
-    condition: (answers: any) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
+    condition: (answers: Answers) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
   },
   {
       id: 'ideaAdditionalNotes',
@@ -307,7 +326,7 @@ const QUESTIONS = [
       question: "Additional Notes / Message",
       placeholder: "Any special requirements...",
       required: false,
-      condition: (answers: any) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
+      condition: (answers: Answers) => answers.track === "IdeaSprint: Build MVP in 24 Hours",
   },
 
 
@@ -319,7 +338,7 @@ const QUESTIONS = [
     subtext: "Describe how you plan to solve the given problem (without copy-paste).",
     placeholder: "Our approach...",
     required: true,
-    condition: (answers: any) => answers.track === "BuildStorm: Solve Problem Statement in 24 Hours",
+    condition: (answers: Answers) => answers.track === "BuildStorm: Solve Problem Statement in 24 Hours",
     noPaste: true,
     guidance: "PROBLEM STATEMENT:\nDisaster Response Coordination - Build a real-time, offline-first system to connect flood victims with local rescue teams.\n\nSuggested Response Pattern:\n\n1. Analysis: Breakdown of the specific problem statement.\n2. Technical Approach: Architecture & Stack choice.\n3. Innovation: What makes your fix unique?\n4. Execution Plan: 24-hour timeline strategy.",
   },
@@ -329,7 +348,7 @@ const QUESTIONS = [
     question: "GitHub Team Repo Link",
     placeholder: "https://github.com/...",
     required: false,
-    condition: (answers: any) => answers.track === "BuildStorm: Solve Problem Statement in 24 Hours",
+    condition: (answers: Answers) => answers.track === "BuildStorm: Solve Problem Statement in 24 Hours",
   },
   {
     id: 'buildRules',
@@ -346,7 +365,7 @@ const QUESTIONS = [
       "I agree organizers decision is final."
     ],
     required: true,
-    condition: (answers: any) => answers.track === "BuildStorm: Solve Problem Statement in 24 Hours",
+    condition: (answers: Answers) => answers.track === "BuildStorm: Solve Problem Statement in 24 Hours",
   },
     {
       id: 'buildAdditionalNotes',
@@ -354,7 +373,7 @@ const QUESTIONS = [
       question: "Additional Notes / Special Requirements",
       placeholder: "Any special requirements...",
       required: false,
-      condition: (answers: any) => answers.track === "BuildStorm: Solve Problem Statement in 24 Hours",
+      condition: (answers: Answers) => answers.track === "BuildStorm: Solve Problem Statement in 24 Hours",
   },
 
   // --- COMMON FINAL SECTION ---
@@ -388,7 +407,8 @@ const WelcomeScreen = ({ onStart }: { onStart: () => void }) => (
 
      <div className="z-10 text-center">
         <div className="inline-block border border-orange-500/50 bg-orange-500/10 px-3 py-1 mb-6 text-orange-400 text-xs tracking-[0.2em] uppercase">
-            // Classified Access
+            {/* Classified Access */}
+            {`// Classified Access`}
         </div>
         <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-2 leading-none uppercase">
           India<span className="text-orange-500">Next</span>
@@ -421,14 +441,14 @@ const ThankYouScreen = ({ track }: { track: string }) => (
            Subject registered for protocol: <strong className="text-white">{track}</strong>.<br/>
            Directives have been forwarded to the designated communication channel (Email).
          </p>
-         <a href="/" className="inline-block px-6 py-2 border border-green-500 text-green-400 hover:bg-green-500 hover:text-black transition-colors uppercase text-sm tracking-wider">
+         <Link href="/" className="inline-block px-6 py-2 border border-green-500 text-green-400 hover:bg-green-500 hover:text-black transition-colors uppercase text-sm tracking-wider">
              [ Return to HQ ]
-         </a>
+         </Link>
       </div>
    </div>
 );
 
-const InputRenderer = ({ question, value, onChange, onCheckbox }: any) => {
+const InputRenderer = ({ question, value, onChange, onCheckbox }: { question: Question; value: string | string[] | undefined; onChange: (val: string) => void; onCheckbox: (opt: string) => void }) => {
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -441,10 +461,9 @@ const InputRenderer = ({ question, value, onChange, onCheckbox }: any) => {
   if (question.type === 'choice') {
     return (
       <div className="flex flex-col gap-2 max-w-lg w-full">
-        {question.options.map((opt: string, idx: number) => (
+        {question.options?.map((opt: string, _idx: number) => (
           <OptionButton 
             key={opt} 
-            idx={idx} 
             opt={opt} 
             selected={value === opt} 
             onSelect={() => onChange(opt)} 
@@ -458,7 +477,7 @@ const InputRenderer = ({ question, value, onChange, onCheckbox }: any) => {
     const selected = value || [];
     return (
       <div className="flex flex-col gap-2 max-w-xl w-full">
-        {question.options.map((opt: string, idx: number) => (
+        {question.options?.map((opt: string, idx: number) => (
            <button
              key={idx}
              onClick={() => onCheckbox(opt)}
@@ -484,7 +503,7 @@ const InputRenderer = ({ question, value, onChange, onCheckbox }: any) => {
     return (
       <div className="flex flex-col md:flex-row gap-6 w-full">
          <textarea
-            ref={inputRef as any}
+            ref={inputRef as React.RefObject<HTMLTextAreaElement & HTMLInputElement>}
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
             onPaste={(e) => {
@@ -526,7 +545,7 @@ const InputRenderer = ({ question, value, onChange, onCheckbox }: any) => {
             <span className="text-xl md:text-2xl text-slate-400 font-mono">+91</span>
          </div>
          <input
-            ref={inputRef as any}
+            ref={inputRef as React.RefObject<HTMLTextAreaElement & HTMLInputElement>}
             type="tel"
             value={value || ''}
             maxLength={10}
@@ -558,7 +577,7 @@ const InputRenderer = ({ question, value, onChange, onCheckbox }: any) => {
 
   return (
     <input
-      ref={inputRef as any}
+      ref={inputRef as React.RefObject<HTMLTextAreaElement & HTMLInputElement>}
       type={question.type}
       value={value || ''}
       onChange={(e) => onChange(e.target.value)}
@@ -569,7 +588,7 @@ const InputRenderer = ({ question, value, onChange, onCheckbox }: any) => {
   );
 };
 
-const OptionButton = ({ opt, selected, onSelect }: any) => {
+const OptionButton = ({ opt, selected, onSelect }: { opt: string; selected: boolean; onSelect: () => void }) => {
    return (
       <button
         onClick={onSelect}
@@ -592,7 +611,7 @@ const OptionButton = ({ opt, selected, onSelect }: any) => {
 export default function HackathonForm() {
   const [started, setStarted] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<any>({});
+  const [answers, setAnswers] = useState<Answers>({});
   const [isCompleted, setIsCompleted] = useState(false);
   const [direction, setDirection] = useState(0);
 
@@ -621,7 +640,7 @@ export default function HackathonForm() {
   const handleStart = () => setStarted(true);
 
   // Logic Helpers
-  const getNextValidStep = (current: number, dir: number, currentAnswers: any) => {
+  const getNextValidStep = React.useCallback((current: number, dir: number, currentAnswers: Answers) => {
     let nextStep = current + dir;
     while (nextStep >= 0 && nextStep < totalSteps) {
        const q = QUESTIONS[nextStep];
@@ -632,7 +651,7 @@ export default function HackathonForm() {
        }
     }
     return nextStep;
-  };
+  }, [totalSteps]);
 
   const sendOtp = React.useCallback(async () => {
       setLoading(true);
@@ -666,8 +685,8 @@ export default function HackathonForm() {
           }
           
           setShowOtpInput(true);
-      } catch (err: any) {
-          setErrorMsg(err.message || 'Network error. Please try again.');
+      } catch (err: unknown) {
+          setErrorMsg(err instanceof Error ? err.message : 'Network error. Please try again.');
       } finally {
           setLoading(false);
       }
@@ -721,8 +740,8 @@ export default function HackathonForm() {
           // ✅ NEW: Log success data
           console.log('Registration successful:', response.data);
           setIsCompleted(true);
-      } catch (err: any) {
-          setErrorMsg(err.message || 'Network error. Please try again.');
+      } catch (err: unknown) {
+          setErrorMsg(err instanceof Error ? err.message : 'Network error. Please try again.');
       } finally {
           setLoading(false);
       }
@@ -755,7 +774,7 @@ export default function HackathonForm() {
 
     // 3. Phone Validation regex
     if (q.type === 'tel') {
-        if (!/^[0-9]{10}$/.test(ans)) {
+        if (typeof ans !== 'string' || !/^[0-9]{10}$/.test(ans)) {
             setErrorMsg("Invalid Format: 10 Digits Required.");
             return;
         }
@@ -763,7 +782,7 @@ export default function HackathonForm() {
 
     // 4. Email format check
     if (q.type === 'email' || q.id.includes('Email')) {
-        if (!ans.includes('@') || !ans.includes('.')) {
+        if (typeof ans !== 'string' || !ans.includes('@') || !ans.includes('.')) {
              setErrorMsg("Invalid Email Format.");
              return;
         }
@@ -784,7 +803,7 @@ export default function HackathonForm() {
     } else {
       await submitForm();
     }
-  }, [currentQuestion, answers, emailVerified, currentStep, totalSteps, sendOtp, submitForm]);
+  }, [currentQuestion, answers, emailVerified, currentStep, totalSteps, sendOtp, submitForm, getNextValidStep]);
 
   const verifyOtp = React.useCallback(async () => {
       setLoading(true);
@@ -837,22 +856,22 @@ export default function HackathonForm() {
              setDirection(1);
              setCurrentStep(nextStep);
           }, 500);
-      } catch (err: any) {
-          setErrorMsg(err.message || 'Network error. Please try again.');
+      } catch (err: unknown) {
+          setErrorMsg(err instanceof Error ? err.message : 'Network error. Please try again.');
       } finally {
           setLoading(false);
       }
-  }, [answers.leaderEmail, otpValue, currentStep, answers]);
+  }, [otpValue, currentStep, answers, getNextValidStep]);
 
   const handlePrev = () => {
     if (showOtpInput) { setShowOtpInput(false); return; }
     const prevStep = getNextValidStep(currentStep, -1, answers);
     if (prevStep >= 0) { setDirection(-1); setCurrentStep(prevStep); setErrorMsg(""); }
   };
-  const handleAnswer = (value: any) => { setAnswers((prev: any) => ({ ...prev, [QUESTIONS[currentStep].id]: value })); setErrorMsg(""); };
+  const handleAnswer = (value: string | string[]) => { setAnswers((prev: Answers) => ({ ...prev, [QUESTIONS[currentStep].id]: value })); setErrorMsg(""); };
   const handleCheckbox = (option: string) => {
-     const currentVals = answers[currentQuestion.id] || [];
-     let newVals;
+     const currentVals = (answers[currentQuestion.id] as string[]) || [];
+     let newVals: string[];
      if (currentVals.includes(option)) newVals = currentVals.filter((v: string) => v !== option);
      else newVals = [...currentVals, option];
      handleAnswer(newVals);
@@ -876,7 +895,7 @@ export default function HackathonForm() {
 
 
   if (!started) return <WelcomeScreen onStart={handleStart} />;
-  if (isCompleted) return <ThankYouScreen track={answers.track} />;
+  if (isCompleted) return <ThankYouScreen track={typeof answers.track === 'string' ? answers.track : ''} />;
 
   // FOLDER THEME UI
   return (

@@ -4,8 +4,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useScroll, useSpring, useMotionValue, useMotionTemplate, useTransform, AnimatePresence, Variants } from "framer-motion";
-import { ArrowRight, Code, Globe, Rocket, Terminal, Zap, Shield, Radio, Lock, Activity, Clock, Users, ChevronRight, HelpCircle, Trophy, FastForward, Target } from "lucide-react";
+import { motion, useScroll, useSpring, useMotionValue, useMotionTemplate, AnimatePresence, Variants } from "framer-motion";
+import { ArrowRight, Code, Globe, Rocket, Terminal, Zap, Shield, Lock, Activity, Clock, Users, ChevronRight, HelpCircle, Trophy, FastForward, Target } from "lucide-react";
 
 // --- Theme Colors ---
 const CYAN = "#00CCFF";
@@ -20,7 +20,7 @@ const fadeInUp: Variants = {
     y: 0, 
     transition: { 
       duration: 0.8, 
-      ease: [0.16, 1, 0.3, 1] as any
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
     } 
   }
 };
@@ -639,9 +639,10 @@ const TimelineSection = () => {
         calculateProgress();
         const interval = setInterval(calculateProgress, 60000);
         return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     
-    const scaleY = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+    const _scaleY = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
     return (
         <section id="timeline" ref={sectionRef} className="py-60 relative z-10 bg-[#020202] overflow-hidden">
@@ -682,7 +683,7 @@ const TimelineSection = () => {
                     <div className="space-y-24 relative">
                         {timelineEvents.map((item, i) => {
                             const isPast = new Date() > item.timestamp;
-                            const isNext = !isPast && (i === 0 || new Date() > timelineEvents[i-1].timestamp);
+                            const _isNext = !isPast && (i === 0 || new Date() > timelineEvents[i-1].timestamp);
 
                             return (
                                 <motion.div 

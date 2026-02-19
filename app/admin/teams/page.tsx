@@ -17,8 +17,8 @@ export default function TeamsManagementPage() {
     college: "",
     search: "",
     dateRange: { from: undefined, to: undefined },
-    sortBy: "createdAt" as const,
-    sortOrder: "desc" as const,
+    sortBy: "createdAt" as "createdAt" | "name" | "status" | "college",
+    sortOrder: "desc" as "asc" | "desc",
     page: 1,
     pageSize: 50,
   });
@@ -46,7 +46,7 @@ export default function TeamsManagementPage() {
       a.click();
 
       toast.success(`Exported ${result.count} teams`);
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to export teams");
     }
   };
@@ -80,7 +80,7 @@ export default function TeamsManagementPage() {
         </div>
       </div>
 
-      <TeamsFilters filters={filters} onChange={setFilters} />
+      <TeamsFilters filters={filters} onChange={(newFilters) => setFilters({ ...filters, ...newFilters })} />
 
       {selectedTeams.length > 0 && (
         <BulkActions
@@ -101,13 +101,30 @@ export default function TeamsManagementPage() {
         selectedTeams={selectedTeams}
         onSelectionChange={setSelectedTeams}
         onPageChange={(page: number) => setFilters({ ...filters, page })}
-        onSort={(sortBy: any, sortOrder: any) => setFilters({ ...filters, sortBy, sortOrder })}
+        onSort={(field: string, order: string) => {
+          if (field === "createdAt" || field === "name" || field === "status" || field === "college") {
+            if (order === "asc" || order === "desc") {
+              setFilters({ ...filters, sortBy: field, sortOrder: order });
+            }
+          }
+        }}
       />
     </div>
   );
 }
 
-function convertToCSV(teams: any[]): string {
+interface ExportTeam {
+  name: string;
+  track: string;
+  status: string;
+  college?: string | null;
+  members: { role: string; user: { name?: string | null; email: string; phone?: string | null } }[];
+  createdAt: string | Date;
+  reviewedAt?: string | Date | null;
+  reviewNotes?: string | null;
+}
+
+function convertToCSV(teams: ExportTeam[]): string {
   const headers = [
     "Team Name",
     "Track",
@@ -123,7 +140,7 @@ function convertToCSV(teams: any[]): string {
   ];
 
   const rows = teams.map((team) => {
-    const leader = team.members.find((m: any) => m.role === "LEADER");
+    const leader = team.members.find((m: { role: string }) => m.role === "LEADER");
     return [
       team.name,
       team.track,

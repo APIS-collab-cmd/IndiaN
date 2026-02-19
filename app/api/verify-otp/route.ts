@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { rateLimitByIP, createRateLimitHeaders } from '@/lib/rate-limit';
 import crypto from 'crypto';
 import { z } from 'zod';
+import type { OtpPurpose } from '@prisma/client';
 
 // Input validation schema
 const VerifyOtpSchema = z.object({
@@ -61,7 +62,7 @@ export async function POST(req: Request) {
       where: {
         email_purpose: {
           email,
-          purpose: purpose as any,
+          purpose: purpose as OtpPurpose,
         },
       },
     });
@@ -87,7 +88,7 @@ export async function POST(req: Request) {
         where: {
           email_purpose: {
             email,
-            purpose: purpose as any,
+            purpose: purpose as OtpPurpose,
           },
         },
       });
@@ -116,7 +117,7 @@ export async function POST(req: Request) {
           where: {
             email_purpose: {
               email,
-              purpose: purpose as any,
+              purpose: purpose as OtpPurpose,
             },
           },
         });
@@ -139,7 +140,7 @@ export async function POST(req: Request) {
         where: {
           email_purpose: {
             email,
-            purpose: purpose as any,
+            purpose: purpose as OtpPurpose,
           },
         },
         data: {
@@ -166,7 +167,7 @@ export async function POST(req: Request) {
       where: {
         email_purpose: {
           email,
-          purpose: purpose as any,
+          purpose: purpose as OtpPurpose,
         },
       },
       data: {

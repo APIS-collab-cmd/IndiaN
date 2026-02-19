@@ -30,12 +30,12 @@ export default function AdminDashboard() {
       {stats && <StatsCards stats={stats} />}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {analytics && <RegistrationChart data={analytics.registrationTrends} />}
-        {analytics && <TrackDistribution data={analytics.trackComparison} />}
+        {analytics && <RegistrationChart _data={Object.fromEntries(analytics.registrationTrends.map(item => [item.date instanceof Date ? item.date.toISOString() : item.date, item.count]))} />}
+        {analytics && <TrackDistribution _data={Object.fromEntries(analytics.trackComparison.map(item => [item.track, item._count]))} />}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {analytics && <TopColleges data={analytics.collegeDistribution} />}
+        {analytics && <TopColleges _data={Object.fromEntries(analytics.collegeDistribution.map(item => [item.college, item._count]))} />}
         <RecentActivity />
       </div>
     </div>

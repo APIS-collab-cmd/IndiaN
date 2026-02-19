@@ -1,5 +1,5 @@
 // Registration Chart - Stub Component
-export function RegistrationChart({ data }: { data: any }) {
+export function RegistrationChart({ _data }: { _data: Record<string, unknown> }) {
   return (
     <div className="bg-white p-6 rounded-lg shadow">
       <h3 className="text-lg font-semibold mb-4">Registration Trends</h3>

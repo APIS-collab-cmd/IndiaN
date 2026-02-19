@@ -1,5 +1,5 @@
 // Admin Sidebar - Stub Component
-export function AdminSidebar({ user }: { user: any }) {
+export function AdminSidebar({ _user }: { _user: { email: string; name?: string; role?: string } }) {
   return (
     <aside className="w-64 bg-gray-900 text-white p-4">
       <div className="text-xl font-bold mb-8">IndiaNext Admin</div>

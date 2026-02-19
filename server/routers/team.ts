@@ -61,7 +61,7 @@ export const teamRouter = router({
       }
 
       // Check if user is member
-      const isMember = team.members.some((m) => m.userId === ctx.session.user.id);
+      const isMember = team.members.some((m: { userId: string }) => m.userId === ctx.session.user.id);
       if (!isMember) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Not a team member" });
       }
@@ -105,7 +105,7 @@ export const teamRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "Team not found" });
       }
 
-      const isMember = team.members.some((m) => m.userId === ctx.session.user.id);
+      const isMember = team.members.some((m: { userId: string }) => m.userId === ctx.session.user.id);
       if (!isMember) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Not a team member" });
       }
@@ -162,7 +162,7 @@ export const teamRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "Team not found" });
       }
 
-      const isMember = team.members.some((m) => m.userId === ctx.session.user.id);
+      const isMember = team.members.some((m: { userId: string }) => m.userId === ctx.session.user.id);
       if (!isMember) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Not a team member" });
       }
@@ -203,7 +203,7 @@ export const teamRouter = router({
       ]);
 
       // Create notifications for all team members
-      const notificationPromises = team.members.map((member) =>
+      const notificationPromises = team.members.map((member: { userId: string }) =>
         ctx.prisma.notification.create({
           data: {
             userId: member.userId,
@@ -235,7 +235,7 @@ export const teamRouter = router({
 
       // Only leader can withdraw
       const isLeader = team.members.some(
-        (m) => m.userId === ctx.session.user.id && m.role === "LEADER"
+        (m: { userId: string; role: string }) => m.userId === ctx.session.user.id && m.role === "LEADER"
       );
       if (!isLeader) {
         throw new TRPCError({ 

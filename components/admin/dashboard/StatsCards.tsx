@@ -1,5 +1,5 @@
 // Stats Cards - Stub Component
-export function StatsCards({ stats }: { stats: any }) {
+export function StatsCards({ stats }: { stats: Record<string, number> }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div className="bg-white p-6 rounded-lg shadow">
